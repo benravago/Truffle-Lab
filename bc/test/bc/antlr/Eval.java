@@ -4,31 +4,37 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.BaseErrorListener;
+import org.antlr.v4.runtime.CharStream;
 
-class Any {
+public abstract class Eval {
 
-    static Path dir = Paths.get("test/data");
+    protected abstract Path resolve(String file);
+    protected abstract Lexer lexer(CharStream input);
+    protected abstract Parser parser(TokenStream input);
 
-    static void exec(String file) throws Exception {
-        var path = dir.resolve(file);
-        var program = eval(Files.newBufferedReader(path));
-        System.out.println(file+' '+program.children.size());
+    public void exec(String file) throws Exception {
+        var path = resolve(file);
+        var result = eval(Files.newBufferedReader(path));
+        System.out.println(file+' '+result.children.size());
     }
-
-    static bcParser.ProgramContext eval(Reader reader) throws Exception {
+    
+    public ParserRuleContext eval(Reader reader) throws Exception {
 
         var in = CharStreams.fromReader(reader);
-        var lexer = new bcLexer(in);
+        var lexer = lexer(in);
         var tokens = new CommonTokenStream(lexer);
         tokens.fill();
-        var parser = new bcParser(tokens);
+        var parser = parser(tokens);
 
         var syntax = new SyntaxErrorListener();
         lexer.removeErrorListeners();
@@ -36,21 +42,21 @@ class Any {
         parser.removeErrorListeners();
         parser.addErrorListener(syntax);
 
-        var result = parser.program();
+        var main = parser.getRuleNames()[0];
+        var result = parser.getClass().getMethod(main).invoke(parser);
 
         if (syntax.err.length() > 0) {
             throw new SyntaxError(syntax.err.toString());
         }
-        return result;
+        return (ParserRuleContext)result;
     }
 
-    static void eval(String text) throws Exception {
-        var program = eval(new StringReader(text));
-        System.out.println(text+" => "+program.children.size());
+    public void eval(String text) throws Exception {
+        var result = eval(new StringReader(text));
+        System.out.println(text+" => "+result.children.size());
     }
 
     static class SyntaxErrorListener extends BaseErrorListener {
-        StringBuilder err = new StringBuilder();
         @Override
         public void syntaxError(
             Recognizer<?, ?> recognizer,
@@ -62,6 +68,7 @@ class Any {
         {
             err.append("\nline " + line + ":" + charPositionInLine + " " + msg);
         }
+        StringBuilder err = new StringBuilder();
     }
 
     static class SyntaxError extends RuntimeException {

@@ -2,9 +2,7 @@ package bc.antlr;
 
 import org.junit.jupiter.api.Test;
 
-import static bc.antlr.Any.*;
-
-class AllTests {
+class AllTests extends All {
 
     @Test void test_add_1() throws Exception { exec("add_1.bc"); }
     @Test void test_add_2() throws Exception { exec("add_2.bc"); }

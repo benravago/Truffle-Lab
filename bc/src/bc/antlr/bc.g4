@@ -1,6 +1,11 @@
 
 grammar bc;
 
+// options { 
+//   superClass = bc.antlr.ContextParser; 
+//   contextSuperClass = bc.antlr.ContextParserRule;
+// }
+
 program
   : bcStatement+
   ;

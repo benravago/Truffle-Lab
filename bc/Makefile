@@ -20,6 +20,9 @@ parser-test: parser
 	${JAVAC} -cp dist/parser.jar:$(ANTLR):$(JUNIT) -d build/classes -sourcepath test test/bc/antlr/AllTests.java
 	$(JAVA) -jar $(JUNIT) -E junit-vintage -cp build/classes:dist/parser.jar:$(ANTLR) -c bc.antlr.AllTests
 
+parser-rules: parser
+	cat test/bc/antlr/bc.jsh | $(JSHELL) --class-path dist/parser.jar:$(ANTLR) -R-DclassName=bc.antlr.bcParser - > test/bc/antlr/bcParserRules.java
+
 dist/language.jar: dist/parser.jar
 	rm -fr build && mkdir -p build/{classes,sources}
 	find src/ch -type f -name '*.java' > build/files
