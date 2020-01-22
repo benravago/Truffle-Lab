@@ -5,5 +5,6 @@ import com.oracle.truffle.api.source.Source;
 
 public interface IBcParser {
     BcRootNode parse(BcLanguage language, Source source);
-    static IBcParser getInstance() { return null; } // TODO: return a bcParser instance
+    
+    static IBcParser getInstance() { return null; } // TODO:
 }

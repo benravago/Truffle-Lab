@@ -7,7 +7,9 @@ import java.util.List;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-class Tools {
+import bc.antlr.ContextParserRule;
+
+class Rules { 
 
     static StackWalker st = StackWalker.getInstance();
 
@@ -22,59 +24,49 @@ class Tools {
         for (var i = 0; i < n; i++) {
             var c = ctx.getChild(i);
             var s = c instanceof TerminalNode ? c.toString()
-                  : c instanceof ContextParserRule ? userData(c)
+                  : c instanceof ContextParserRule ? toString(c)
                   : "";
             System.out.println("  "+i+' '+c.getClass().getSimpleName()+' '+s);
         }
     }
 
-    static String userData(Object o) {
-        var t = ((ContextParserRule)o).getUserData();
+    static String toString(Object o) {
+        var t = ((ContextParserRule)o).userData();
         return t instanceof Object[] ? Arrays.deepToString((Object[])t) : String.valueOf(t);
     }
 
-    static Object[] cat(Object[] a, Object b) {
-        var c = Arrays.copyOf(a,a.length+1);
-        c[a.length] = b;
-        return c;
-    }
-
-    static Object[] as(Object... a) { return a; }
-
-    @SuppressWarnings("unchecked")
-    static Object[] mock(Object... in) {
+    static Object[] userData(List<ParseTree> children) {
         var out = new ArrayList<Object>();
-        for (var i = 0; i < in.length; i++) {
-            var o = in[i];
-            if (o instanceof List) {
-                collect(out,(List<ParseTree>)o,(String)in[i+1],(String)in[i+2]);
-                break;
-            } else {
-                out.add(o);
-            }
+        for (var c:children){
+            if (c instanceof ContextParserRule) {
+                out.add(((ContextParserRule)c).userData());
+            } 
         }
         return out.toArray();
     }
-
-    static void collect(List<Object> out, List<ParseTree> children, String from, String to) {
+    
+    static Object[] userData(List<ParseTree> children, String from, String to) {
+        var out = new ArrayList<Object>();
         var in = children.iterator();
         if (from != null) {
             while (in.hasNext()) {
-                var o = in.next();
-                if (o instanceof TerminalNode) {
-                   if (String.valueOf(o).equals(from)) break;
+                var c = in.next();
+                if (c instanceof TerminalNode) {
+                   if (String.valueOf(c).equals(from)) break;
                 }
             }
         }
         while (in.hasNext()) {
-            var o = in.next();
-            if (o instanceof TerminalNode) {
-                if (String.valueOf(o).equals(to)) break;
+            var c = in.next();
+            if (c instanceof TerminalNode) {
+                if (String.valueOf(c).equals(to)) break;
             }
-            if (o instanceof ContextParserRule) {
-               out.add(ContextParserRule.userData((ContextParserRule)o));
+            if (c instanceof ContextParserRule) {
+               out.add(((ContextParserRule)c).userData());
             }
         }
+        return out.toArray();
     }
-
+    
+    static Object[] as(Object... objects) { return objects; }
 }

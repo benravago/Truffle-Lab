@@ -3,10 +3,8 @@ package bc.antlr;
 import java.lang.reflect.Method;
 import java.lang.reflect.InvocationTargetException;
 
-import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayDeque;
 
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -15,23 +13,23 @@ import org.antlr.v4.runtime.TokenStream;
 public abstract class ContextParser extends Parser {
 
     Object listener;
-    Map<String,Method> begin, finish;
+    Method[] begin, finish;
 
     Deque<ParserRuleContext> stack;
 
-    public ContextParser (TokenStream input) {
+    public ContextParser(TokenStream input) {
         super(input);
         stack = new ArrayDeque<>();
     }
 
-    public void setContextListener(Object listener) {
-        this.listener = listener;
-        mapHandlers();
+    public void setContextListener(Object handlers) {
+        listener = handlers;
+        if (listener != null) mapHandlers();
     }
 
     void push(ParserRuleContext ctx) {
         stack.push(ctx);
-        if (begin != null) call(begin,ctx);
+        if (listener != null) call(begin,ctx);
     }
 
     @Override
@@ -43,10 +41,7 @@ public abstract class ContextParser extends Parser {
     @Override
     public void exitRule() {
         super.exitRule();
-        if (listener != null) {
-            var ctx = stack.pop();
-            if (finish != null) call(finish,ctx);
-        }
+        if (listener != null) call(finish,stack.pop());
     }
 
     @Override
@@ -67,16 +62,14 @@ public abstract class ContextParser extends Parser {
         if (listener != null) {
             var q = new ArrayDeque<ParserRuleContext>();
             while (stack.peek() != parentctx) q.push(stack.pop());
-            if (finish != null) {
-                while (!q.isEmpty()) call(finish,q.pop());
-            }
+            while (!q.isEmpty()) call(finish,q.pop());
         }
     }
 
-    void call(Map<String,Method> map, ParserRuleContext ctx) {
-        var m = map.get(ctx.getClass().getSimpleName());
-        if (m != null) {
-            try { m.invoke(listener,ctx); }
+    void call(Method[] map, ParserRuleContext ctx) {
+        var i = ctx.getRuleIndex();
+        if (i > -1 && map[i] != null) {
+            try { map[i].invoke(listener,ctx); }
             catch (IllegalAccessException | IllegalArgumentException e) { uncheck(e); }
             catch (InvocationTargetException e) { uncheck(e.getCause()); }
         }
@@ -86,42 +79,42 @@ public abstract class ContextParser extends Parser {
     static <T extends Throwable,V> V uncheck(Throwable e) throws T { throw (T)e; }
 
     void mapHandlers() {
-        var init = new HashMap<String,Method>();
-        var on = new HashMap<String,Method>();
+        var n = getRuleNames().length;
+        begin = new Method[n];
+        finish = new Method[n];
         for (var method : listener.getClass().getDeclaredMethods()) {
 
             var types = method.getParameterTypes();
             if (types.length != 1) continue;
-            var type = types[0];
-            if (!ParserRuleContext.class.isAssignableFrom(type)) continue;
+            if (!ParserRuleContext.class.isAssignableFrom(types[0])) continue;
 
-            var context = type.getSimpleName();
-            var rule = context.substring(0,context.length()-7);
-            var m = method.getName();
-            if (m.equals("init"+rule)) {
-                init.put(context,method);
-            } else if (m.equals("on"+rule)) {
-                on.put(context,method);
+            var name = method.getName();
+            if (name.startsWith("init")) {
+                name = Character.toLowerCase(name.charAt(4)) + name.substring(5);
+                put(begin,name,method);
+            } else if (name.startsWith("on")) {
+                name = Character.toLowerCase(name.charAt(2)) + name.substring(3);
+                put(finish,name,method);
             }
-
+            
             var ir = method.getAnnotation(ContextParserRule.InitRule.class);
             if (ir != null) {
-                putAll(init,ir.value(),method);
+                putAll(begin,ir.value(),method);
             }
             var or = method.getAnnotation(ContextParserRule.OnRule.class);
             if (or != null) {
-                putAll(on,or.value(),method);
+                putAll(finish,or.value(),method);
             }
         }
-        begin = init.isEmpty() ? null : init;
-        finish = on.isEmpty() ? null : on;
+    }
+    
+    void put(Method[] map, String name, Method method) {
+        var i = getRuleIndex(name);
+        if (i > -1) map[i] = method;
     }
 
-    static void putAll(Map<String,Method> map, String[] rules, Method value) {
-        for (var k:rules) {
-            var key = Character.toUpperCase(k.charAt(0)) + k.substring(1) + "Context";
-            map.put(key,value);
-        }
+    void putAll(Method[] map, String[] rules, Method method) {
+        for (var rule:rules) put(map,rule,method);
     }
 
 }

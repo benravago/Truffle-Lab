@@ -1,10 +1,10 @@
 
 grammar bc;
 
-// options { 
-//   superClass = bc.antlr.ContextParser; 
-//   contextSuperClass = bc.antlr.ContextParserRule;
-// }
+options { 
+  superClass = bc.antlr.ContextParser; 
+  contextSuperClass = bc.antlr.ContextParserRule;
+}
 
 program
   : bcStatement+
@@ -65,8 +65,7 @@ bcFunctionDefinition
   ;
 
 bcPrint
-  : 'print' printArg ( ',' printArg )*
-  | 'print' '(' printArg ( ',' printArg )* ')'
+  : 'print' '('? printArg ( ',' printArg )* ')'?
   ;
 
 printArg
@@ -79,7 +78,7 @@ parameters
   ;
 
 bcAutoList
-  : 'auto' parameters
+  : 'auto' parameters ';'?
   ;
 
 bcVarDecl

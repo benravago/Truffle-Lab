@@ -10,38 +10,21 @@ import org.antlr.v4.runtime.TokenStream;
 
 public class BcEval extends Eval {
 
-    Object listener;
-    
-    // public BcEval() {
-    //   this(new BcRules());
-    // }
-    
-    BcEval(Object listener) {
-        this.listener = listener;
-    }
-    
-    Path dir = Paths.get("test/data");
-    
-    @Override
-    protected Path resolve(String file) {
-        return dir.resolve(file);
-    }
+  Path dir = Paths.get("test/data");
+  
+  @Override
+  protected Path resolve(String file) {
+    return dir.resolve(file);
+  }
 
-    @Override
-    protected Lexer lexer(CharStream input) {
-        return new bcLexer(input);
-    }
+  @Override
+  protected Lexer lexer(CharStream input) {
+    return new bcLexer(input);
+  }
 
-    @Override
-    protected Parser parser(TokenStream input) {
-        var parser = new bcParser(input);
-        // if (parser instanceof ContextParser && listener != null) {
-        //   ((ContextParser)parser).setContextListener(listener);
-        // }
-        return parser;
-    }
+  @Override
+  protected Parser parser(TokenStream input) {
+    return new bcParser(input);
+  }
 
-    public static void main(String... args) throws Exception {
-        REPL.main("bc.antlr.BcEval");
-    }
 }

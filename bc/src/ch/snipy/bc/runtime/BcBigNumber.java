@@ -250,27 +250,27 @@ public final class BcBigNumber implements TruffleObject, Comparable<BcBigNumber>
 
     @TruffleBoundary
     public BcBigNumber sin() {
-        return valueOf(new BigDecimal(Math.sin(value.doubleValue()), getMathContext()));
+        return valueOf(new BigDecimal(Math.sin(value.doubleValue()),getMathContext()));
     }
 
     @TruffleBoundary
     public BcBigNumber cos() {
-        return valueOf(new BigDecimal(Math.cos(value.doubleValue()), getMathContext()));
+    	return valueOf(new BigDecimal(Math.cos(value.doubleValue()),getMathContext()));
     }
 
     @TruffleBoundary
     public BcBigNumber atan() {
-        return valueOf(new BigDecimal(Math.atan(value.doubleValue()), getMathContext()));
+    	return valueOf(new BigDecimal(Math.atan(value.doubleValue()),getMathContext()));
     }
 
     @TruffleBoundary
     public BcBigNumber ln() {
-        return valueOf(new BigDecimal(Math.log(value.doubleValue()), getMathContext()));
+    	return valueOf(new BigDecimal(Math.log(value.doubleValue()),getMathContext()));
     }
 
     @TruffleBoundary
     public BcBigNumber exp() {
-        return valueOf(new BigDecimal(Math.exp(value.doubleValue()), getMathContext()));
+    	return valueOf(new BigDecimal(Math.exp(value.doubleValue()),getMathContext()));
     }
 
     @TruffleBoundary

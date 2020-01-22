@@ -43,6 +43,7 @@ public class BcLanguage extends TruffleLanguage<BcContext> {
     protected CallTarget parse(ParsingRequest request) {
         Source source = request.getSource();
         RootNode root = IBcParser.getInstance().parse(this, source);
+        			 // BcParser$.MODULE$.parse(this, source);
         return Truffle.getRuntime().createCallTarget(root);
     }
 }
