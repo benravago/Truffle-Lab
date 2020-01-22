@@ -97,11 +97,11 @@ public abstract class ContextParser extends Parser {
                 put(end,name,method);
             }
 
-            var ir = method.getAnnotation(ContextParserRule.InitRule.class);
+            var ir = method.getAnnotation(ContextParserRule.BeginRule.class);
             if (ir != null) {
                 putAll(begin,ir.value(),method);
             }
-            var or = method.getAnnotation(ContextParserRule.OnRule.class);
+            var or = method.getAnnotation(ContextParserRule.EndRule.class);
             if (or != null) {
                 putAll(end,or.value(),method);
             }

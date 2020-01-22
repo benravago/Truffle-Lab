@@ -42,13 +42,13 @@ public class ContextParserRule extends ParserRuleContext {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    public @interface InitRule {
+    public @interface BeginRule {
         String[] value();
     }
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
-    public @interface OnRule {
+    public @interface EndRule {
         String[] value();
     }
 
