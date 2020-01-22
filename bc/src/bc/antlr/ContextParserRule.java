@@ -23,7 +23,7 @@ public class ContextParserRule extends ParserRuleContext {
 
     public <T> T getUserData() { return (T) userData; }
     public <T> void setUserData(T userData) { this.userData = userData; }
-    
+
     public <T> T userData() {
         return userData != null ? (T) userData
              : getChildCount() == 1 ? userData(0)
@@ -39,13 +39,13 @@ public class ContextParserRule extends ParserRuleContext {
         var c = getChild(i);
         return c instanceof TerminalNode ? String.valueOf(c) : null;
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     public @interface InitRule {
         String[] value();
     }
-    
+
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.METHOD)
     public @interface OnRule {
@@ -53,15 +53,3 @@ public class ContextParserRule extends ParserRuleContext {
     }
 
 }
-
-//  public <T> T userData(int i) {
-//      var c = getChild(i);
-//      while (c instanceof ContextParserRule) {
-//          var t = ((ContextParserRule)c).getUserData();
-//          if (t != null) return (T)t;
-//          if (c.getChildCount() != 1) break;
-//          c = c.getChild(0);
-//      }
-//      return null;
-//  }
-

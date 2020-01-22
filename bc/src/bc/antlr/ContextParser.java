@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.TokenStream;
 public abstract class ContextParser extends Parser {
 
     Object listener;
-    Method[] begin, finish;
+    Method[] begin, end;
 
     Deque<ParserRuleContext> stack;
 
@@ -41,7 +41,7 @@ public abstract class ContextParser extends Parser {
     @Override
     public void exitRule() {
         super.exitRule();
-        if (listener != null) call(finish,stack.pop());
+        if (listener != null) call(end,stack.pop());
     }
 
     @Override
@@ -62,7 +62,7 @@ public abstract class ContextParser extends Parser {
         if (listener != null) {
             var q = new ArrayDeque<ParserRuleContext>();
             while (stack.peek() != parentctx) q.push(stack.pop());
-            while (!q.isEmpty()) call(finish,q.pop());
+            while (!q.isEmpty()) call(end,q.pop());
         }
     }
 
@@ -81,7 +81,7 @@ public abstract class ContextParser extends Parser {
     void mapHandlers() {
         var n = getRuleNames().length;
         begin = new Method[n];
-        finish = new Method[n];
+        end = new Method[n];
         for (var method : listener.getClass().getDeclaredMethods()) {
 
             var types = method.getParameterTypes();
@@ -89,25 +89,25 @@ public abstract class ContextParser extends Parser {
             if (!ParserRuleContext.class.isAssignableFrom(types[0])) continue;
 
             var name = method.getName();
-            if (name.startsWith("init")) {
-                name = Character.toLowerCase(name.charAt(4)) + name.substring(5);
+            if (name.startsWith("begin")) {
+                name = Character.toLowerCase(name.charAt(5)) + name.substring(6);
                 put(begin,name,method);
-            } else if (name.startsWith("on")) {
-                name = Character.toLowerCase(name.charAt(2)) + name.substring(3);
-                put(finish,name,method);
+            } else if (name.startsWith("end")) {
+                name = Character.toLowerCase(name.charAt(3)) + name.substring(4);
+                put(end,name,method);
             }
-            
+
             var ir = method.getAnnotation(ContextParserRule.InitRule.class);
             if (ir != null) {
                 putAll(begin,ir.value(),method);
             }
             var or = method.getAnnotation(ContextParserRule.OnRule.class);
             if (or != null) {
-                putAll(finish,or.value(),method);
+                putAll(end,or.value(),method);
             }
         }
     }
-    
+
     void put(Method[] map, String name, Method method) {
         var i = getRuleIndex(name);
         if (i > -1) map[i] = method;

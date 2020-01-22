@@ -27,7 +27,7 @@ public abstract class Eval {
         var result = eval(Files.newBufferedReader(path));
         System.out.println(file+' '+result.children.size());
     }
-    
+
     public ParserRuleContext eval(Reader reader) throws Exception {
 
         var in = CharStreams.fromReader(reader);

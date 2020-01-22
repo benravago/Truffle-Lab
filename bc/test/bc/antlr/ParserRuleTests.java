@@ -15,6 +15,6 @@ class ParserRuleTests extends BcFiles {
       return parser;
     }
   };
-  
+
   @Override void exec(String file) throws Exception { bc.exec(file); }
 }

@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.TokenStream;
 public class BcEval extends Eval {
 
   Path dir = Paths.get("test/data");
-  
+
   @Override
   protected Path resolve(String file) {
     return dir.resolve(file);

@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import bc.antlr.ContextParserRule;
 
-class Rules { 
+class Rules {
 
     static StackWalker st = StackWalker.getInstance();
 
@@ -40,11 +40,11 @@ class Rules {
         for (var c:children){
             if (c instanceof ContextParserRule) {
                 out.add(((ContextParserRule)c).userData());
-            } 
+            }
         }
         return out.toArray();
     }
-    
+
     static Object[] userData(List<ParseTree> children, String from, String to) {
         var out = new ArrayList<Object>();
         var in = children.iterator();
@@ -67,6 +67,6 @@ class Rules {
         }
         return out.toArray();
     }
-    
+
     static Object[] as(Object... objects) { return objects; }
 }
