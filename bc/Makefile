@@ -17,11 +17,16 @@ dist/parser.jar: src/bc/antlr/bcParser.java src/bc/antlr/bcLexer.java
 
 parser-test: parser
 	rm -fr build && mkdir -p build/classes
-	${JAVAC} -cp dist/parser.jar:$(ANTLR):$(JUNIT) -d build/classes -sourcepath test test/bc/antlr/AllTests.java
-	$(JAVA) -jar $(JUNIT) -E junit-vintage -cp build/classes:dist/parser.jar:$(ANTLR) -c bc.antlr.AllTests
+	${JAVAC} -cp dist/parser.jar:$(ANTLR):$(JUNIT) -d build/classes -sourcepath test test/bc/antlr/ParserTests.java
+	$(JAVA) -jar $(JUNIT) -E junit-vintage -cp build/classes:dist/parser.jar:$(ANTLR) -c bc.antlr.ParserTests
 
 parser-rules: parser
 	cat test/bc/antlr/bc.jsh | $(JSHELL) --class-path dist/parser.jar:$(ANTLR) -R-DclassName=bc.antlr.bcParser - > test/bc/antlr/bcParserRules.java
+
+parser-rules-test: parser
+	rm -fr build && mkdir -p build/classes
+	${JAVAC} -cp dist/parser.jar:$(ANTLR):$(JUNIT) -d build/classes -sourcepath test test/bc/antlr/ParserRulesTests.java
+	$(JAVA) -jar $(JUNIT) -E junit-vintage -cp build/classes:dist/parser.jar:$(ANTLR) -c bc.antlr.ParserRulesTests
 
 dist/language.jar: dist/parser.jar
 	rm -fr build && mkdir -p build/{classes,sources}
@@ -32,5 +37,6 @@ dist/language.jar: dist/parser.jar
 
 clean:
 	rm -fv src/bc/antlr/bc{Parser,Lexer}.java
+	rm -fv test/bc/antlr/bcParserRules.java
 	rm -fr build
 
